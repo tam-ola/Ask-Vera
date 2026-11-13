@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Second Feature</title>
+<meta name="description" content="Bring one film. Vera Olusanya-Brandt, who programmed the Lyceum for twenty-eight years, gives you the second one, the running order, and why. Runs entirely in your browser.">
+<meta name="theme-color" content="#1b1916">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Second Feature">
+<meta property="og:description" content="Bring one film. A retired repertory programmer gives you the second one, the running order, and why. Runs entirely in your browser.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231b1916'/%3E%3Ccircle cx='11' cy='16' r='7' fill='none' stroke='%23f0b54a' stroke-width='2.5'/%3E%3Ccircle cx='23' cy='16' r='5' fill='none' stroke='%23f0b54a' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://huggingface.co" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --booth: #1b1916;
+    --booth-2: #24211d;
+    --card: #f3ecdc;
+    --card-edge: #d9cfb8;
+    --rule-blue: #9db4c8;
+    --rule-red: #c46a5a;
+    --ink: #22201c;
+    --ink-soft: #5c564b;
+    --stub: #e6c46a;
+    --stub-ink: #2a2310;
+    --lamp: #f0b54a;
+    --text-on-booth: #e8e1d2;
+    --muted-on-booth: #a39a88;
+    --warn: #a8442f;
+    --ok: #4e6b3a;
+    --shadow: 0 1px 0 rgba(0,0,0,.25), 0 6px 18px rgba(0,0,0,.35);
+    --mono: "Courier Prime", ui-monospace, "Courier New", monospace;
+    --serif: "Libre Caslon Text", Georgia, serif;
+  }
+  /* The booth is dark in both schemes; the cards are always paper. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --booth: #141310; --booth-2: #1d1b17; }
+  }
+  :root[data-theme="dark"] { --booth: #141310; --booth-2: #1d1b17; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--booth);
+    background-image: radial-gradient(ellipse at 50% -10%, rgba(240,181,74,.10), transparent 60%);
+    color: var(--text-on-booth);
+    font-family: var(--serif);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 28px 16px 48px; }
+
+  header { display: flex; gap: 16px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 18px; }
+  .marquee { font-family: var(--mono); letter-spacing: .32em; text-transform: uppercase; font-size: 12px; color: var(--lamp); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(30px, 6vw, 44px); margin: 4px 0 0; line-height: 1.05; }
+  h1 em { color: var(--lamp); }
+  .byline { color: var(--muted-on-booth); font-style: italic; margin-top: 6px; font-size: 15px; }
+
+  /* ---------- Model panel ---------- */
+  .panel {
+    background: var(--booth-2);
+    border: 1px solid #36322b;
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 18px;
+  }
+  .note { font-size: 14px; color: var(--muted-on-booth); margin: 0 0 12px; }
+  .note strong { color: var(--text-on-booth); font-weight: 700; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  select, input, textarea, button { font: inherit; }
+  .panel select {
+    background: #2d2a24; color: var(--text-on-booth); border: 1px solid #4a443a;
+    border-radius: 3px; padding: 8px 10px; font-family: var(--mono); font-size: 13px; max-width: 100%;
+  }
+  .btn {
+    font-family: var(--mono); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 13px;
+    background: var(--lamp); color: #1d1606; border: 0; border-radius: 3px; padding: 10px 16px; cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.07); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+  .btn.ghost { background: transparent; color: var(--text-on-booth); border: 1px solid #4a443a; }
+  .backend { font-family: var(--mono); font-size: 12px; color: var(--muted-on-booth); }
+  .backend b { color: var(--text-on-booth); }
+
+  .progress { margin-top: 12px; display: none; }
+  .progress.on { display: block; }
+  .bar { height: 10px; background: #2d2a24; border-radius: 2px; overflow: hidden; border: 1px solid #3c372f; }
+  .bar > i { display: block; height: 100%; width: 0%; background: repeating-linear-gradient(90deg, var(--lamp) 0 14px, #d99a2b 14px 16px); transition: width .2s linear; }
+  .ptext { font-family: var(--mono); font-size: 12px; color: var(--muted-on-booth); margin-top: 6px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+  /* ---------- Chat ---------- */
+  .chat { display: flex; flex-direction: column; gap: 14px; min-height: 160px; margin-bottom: 16px; }
+  .empty { color: var(--muted-on-booth); font-style: italic; text-align: center; padding: 26px 8px; border: 1px dashed #3c372f; border-radius: 4px; }
+
+  /* Visitor: a ticket stub */
+  .msg.user { align-self: flex-end; max-width: 86%; }
+  .stub {
+    background: var(--stub); color: var(--stub-ink); font-family: var(--mono); font-size: 14px;
+    padding: 10px 16px 10px 22px; position: relative; border-radius: 2px; box-shadow: var(--shadow);
+    -webkit-mask: radial-gradient(circle 6px at 0 50%, transparent 98%, #000) ;
+            mask: radial-gradient(circle 6px at 0 50%, transparent 98%, #000);
+  }
+  .stub::before { content: "ADMIT ONE"; display: block; font-size: 10px; letter-spacing: .3em; opacity: .65; margin-bottom: 2px; }
+
+  /* Vera: an index card */
+  .msg.vera { align-self: stretch; }
+  .card {
+    background: var(--card); color: var(--ink); border-radius: 3px; box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--card-edge);
+    padding: 12px 18px 16px;
+    position: relative;
+    font-family: var(--mono); font-size: 14.5px; line-height: 26px;
+  }
+  .card::after { content: ""; position: absolute; left: 0; right: 0; top: 43px; border-top: 1.5px solid var(--rule-red); }
+  .card .cardhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; height: 32px; margin-bottom: 12px; }
+  .card .no { font-size: 11px; letter-spacing: .2em; color: var(--ink-soft); text-transform: uppercase; }
+  .typechip {
+    font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: .14em; font-size: 12px;
+    border: 1.5px solid currentColor; padding: 1px 8px; border-radius: 2px; line-height: 20px;
+  }
+  .t-rhyme { color: #2f5b7a; } .t-argument { color: #9a3b2a; } .t-lineage { color: #5a4a8a; }
+  .t-escalation { color: #9a5a10; } .t-palate { color: #3f6b40; } .t-none { color: var(--ink-soft); }
+  .card dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; column-gap: 14px; }
+  .card dt { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); }
+  .card dd { margin: 0; }
+  .card .why { margin-top: 0; white-space: pre-wrap; }
+  .card .speech { white-space: pre-wrap; }
+  .order { list-style: none; margin: 0; padding: 0; }
+  .order li::before { content: attr(data-n) "  "; color: var(--rule-red); font-weight: 700; }
+  .flag { color: var(--warn); font-weight: 700; }
+  .card .actions { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .card .actions button {
+    font-family: var(--mono); font-size: 12px; background: transparent; color: var(--ink);
+    border: 1px solid #b8ad94; padding: 2px 10px; border-radius: 2px; cursor: pointer; line-height: 22px;
+  }
+  .card .actions button:hover { background: #e9dfc8; }
+  .thinking { color: var(--ink-soft); font-style: italic; }
+  .thinking::after { content: "▍"; animation: blink 1s steps(1) infinite; margin-left: 2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- Composer ---------- */
+  form.composer {
+    background: var(--booth-2); border: 1px solid #36322b; border-radius: 4px; padding: 14px; display: grid; gap: 10px;
+  }
+  .composer label { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted-on-booth); display: block; margin-bottom: 4px; }
+  .composer input, .composer textarea, .composer select {
+    width: 100%; background: var(--card); color: var(--ink); border: 0; border-radius: 2px;
+    padding: 10px 12px; font-family: var(--mono); font-size: 15px;
+  }
+  .composer textarea { resize: vertical; min-height: 44px; }
+  .grid2 { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+  @media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+  .composer .row { justify-content: space-between; }
+  .hint { font-size: 13px; color: var(--muted-on-booth); font-style: italic; }
+
+  .types { margin-top: 22px; font-size: 14px; color: var(--muted-on-booth); }
+  .types summary { cursor: pointer; font-family: var(--mono); letter-spacing: .14em; text-transform: uppercase; font-size: 12px; color: var(--text-on-booth); }
+  .types dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 10px 0 0; }
+  .types dt { font-family: var(--mono); color: var(--lamp); }
+  .types dd { margin: 0; }
+  footer { margin-top: 26px; font-size: 12px; color: var(--muted-on-booth); font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="marquee">The Lyceum · 312 seats · 1986–2014</div>
+      <h1>Second <em>Feature</em></h1>
+      <div class="byline">Bring one film. Vera Olusanya-Brandt will give you the other one, the order, and the reason.</div>
+    </div>
+  </header>
+
+  <section class="panel" aria-labelledby="model-h">
+    <p class="note" id="model-h">
+      <strong>The model is downloaded once, then runs entirely on your device.</strong>
+      Your browser keeps it cached, so the next visit starts in seconds. Nothing you type is sent anywhere —
+      there is no server, only this page and the model on your machine.
+      <span id="sizeNote"></span>
+    </p>
+    <div class="row">
+      <select id="modelSel" aria-label="Model"></select>
+      <button class="btn" id="dlBtn" type="button">Download model</button>
+      <span class="backend" id="backend">Checking for WebGPU…</span>
+    </div>
+    <div class="progress" id="progress" aria-live="polite">
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar"><i id="barFill"></i></div>
+      <div class="ptext"><span id="pLeft">Starting…</span><span id="pRight"></span></div>
+    </div>
+  </section>
+
+  <section class="chat" id="chat" aria-live="polite">
+    <div class="empty" id="empty">The projector's warm. Load the model, then tell her what you're showing.</div>
+  </section>
+
+  <form class="composer" id="composer" autocomplete="off">
+    <div class="grid2">
+      <div>
+        <label for="film">Your film</label>
+        <input id="film" placeholder="e.g. Tokyo Story, or Jaws" maxlength="120" required>
+      </div>
+      <div>
+        <label for="ptype">Pairing type</label>
+        <select id="ptype">
+          <option value="">Her choice</option>
+          <option value="rhyme">Rhyme</option>
+          <option value="argument">Argument</option>
+          <option value="lineage">Lineage</option>
+          <option value="escalation">Escalation</option>
+          <option value="palate cleanser">Palate cleanser</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label for="note">Anything she should know (optional)</label>
+      <textarea id="note" rows="1" maxlength="400" placeholder="Who's coming, what you loved about it, how late the last bus is…"></textarea>
+    </div>
+    <div class="row">
+      <span class="hint" id="hint">Load the model first.</span>
+      <span class="row" style="gap:8px">
+        <button class="btn ghost" id="resetBtn" type="button" title="Clear the conversation">New evening</button>
+        <button class="btn ghost" id="stopBtn" type="button" hidden>Stop</button>
+        <button class="btn" id="sendBtn" type="submit" disabled>Ask Vera</button>
+      </span>
+    </div>
+  </form>
+
+  <details class="types">
+    <summary>The five pairing types</summary>
+    <dl>
+      <dt>Rhyme</dt><dd>A shared gesture or structure across eras.</dd>
+      <dt>Argument</dt><dd>The second film rebuts the first.</dd>
+      <dt>Lineage</dt><dd>The thing, and what it stole from.</dd>
+      <dt>Escalation</dt><dd>Same material — cautious, then unhinged.</dd>
+      <dt>Palate cleanser</dt><dd>Something heavy, then something that lets you leave the building.</dd>
+    </dl>
+    <p>No bill over 240 minutes. Running order is the whole art: the same two films the other way round are a different evening.</p>
+  </details>
+
+  <footer>Small language models misremember. Check a running time before you book the print.</footer>
+</div>
+
+<script type="module">
+/* ------------------------------------------------------------------ *
+ *  Models. Recommended: Llama 3.2 1B Instruct (4-bit).               *
+ *  0.5B models can do the clipped register but invent films and      *
+ *  drop the format; 1B is the smallest that holds both.              *
+ * ------------------------------------------------------------------ */
+const MODELS = {
+  "llama-1b": {
+    id: "onnx-community/Llama-3.2-1B-Instruct",
+    label: "Llama 3.2 1B Instruct — recommended",
+    size: { q4f16: "about 1.1 GB", q4: "about 1.6 GB" },
+  },
+  "qwen-0.5b": {
+    id: "onnx-community/Qwen2.5-0.5B-Instruct",
+    label: "Qwen2.5 0.5B Instruct — lighter, less reliable",
+    size: { q4f16: "about 0.5 GB", q4: "about 0.8 GB" },
+  },
+};
+
+const TYPES = ["rhyme", "argument", "lineage", "escalation", "palate cleanser"];
+const MAX_TURNS_KEPT = 2;        // user+assistant exchanges kept in history
+const MAX_NEW_TOKENS = 340;
+const MAX_RUNTIME = 240;
+
+const SYSTEM_PROMPT = `You are Vera Olusanya-Brandt, 68. You programmed the Lyceum, a 312-seat single-screen cinema in an industrial city, from 1986 to 2014. Before that you ran a film society on a 16mm projector you maintained yourself. You keep a private card index of about four thousand double bills.
+
+The visitor brings ONE film. You give them a SECOND film to show with it, the running order, and why it works on a room.
+
+Every pairing is exactly one of these types. Name it.
+- rhyme: a shared gesture or structure across eras.
+- argument: the second film rebuts the first.
+- lineage: the film and what it stole from.
+- escalation: same material, first cautious, then unhinged.
+- palate cleanser: something heavy, then something that lets the audience leave the building.
+
+Rules:
+- Total running time never over 240 minutes.
+- Running order matters. Say which goes first and why.
+- Talk about what the films do to an audience in a room, not about quality in the abstract. Be specific: a shot, a minute, a reel.
+- Judgment first, then the reason. Flat, plain, unhurried. No hedging, no flattery, no exclamation marks.
+- If you call a film overrated, name what it is famous for and the film that does that thing better.
+- Only suggest films you are sure exist. If you do not know the visitor's film (much after 2015, streaming, animation), say "I haven't seen it." and ask what it does. Do not invent.
+
+Answer in exactly this format, nothing before it:
+TYPE: <rhyme | argument | lineage | escalation | palate cleanser>
+PAIR WITH: <Title> (<year>, <director>, <minutes> min)
+FIRST: <title>
+SECOND: <title>
+TOTAL: <minutes> min
+WHY: <three to five sentences in your voice>
+
+Example. Visitor: Tokyo Story.
+TYPE: lineage
+PAIR WITH: Make Way for Tomorrow (1937, Leo McCarey, 92 min)
+FIRST: Make Way for Tomorrow
+SECOND: Tokyo Story
+TOTAL: 228 min
+WHY: Ozu took the bones of it, the old couple and the children with no room for them. McCarey first, because it is the louder film and the room cries at it openly. Then Ozu does the same thing without raising his voice and they sit very still. Put them the other way round and McCarey looks like he is shouting.
+
+Example. Visitor: Rear Window.
+TYPE: argument
+PAIR WITH: Peeping Tom (1960, Michael Powell, 101 min)
+FIRST: Rear Window
+SECOND: Peeping Tom
+TOTAL: 213 min
+WHY: Hitchcock lets the audience enjoy watching and then forgives them for it. Powell does not forgive anyone. Rear Window first so they arrive pleased with themselves. Nobody talks in the bar afterwards, which is the point.
+
+Never reuse the example films unless the visitor brings one of them.`;
+
+/* ------------------------------------------------------------------ */
+const $ = (id) => document.getElementById(id);
+const els = {
+  modelSel: $("modelSel"), dlBtn: $("dlBtn"), backend: $("backend"), sizeNote: $("sizeNote"),
+  progress: $("progress"), bar: $("bar"), barFill: $("barFill"), pLeft: $("pLeft"), pRight: $("pRight"),
+  chat: $("chat"), empty: $("empty"), composer: $("composer"), film: $("film"), ptype: $("ptype"),
+  note: $("note"), hint: $("hint"), sendBtn: $("sendBtn"), stopBtn: $("stopBtn"), resetBtn: $("resetBtn"),
+};
+
+let T = null;                 // transformers module
+let generator = null;
+let stopper = null;
+let device = "wasm";
+let dtype = "q4";
+let history = [];             // [{role, content}] — trimmed
+let busy = false;
+let cardNo = 0;
+
+for (const [key, m] of Object.entries(MODELS)) {
+  const o = document.createElement("option");
+  o.value = key; o.textContent = m.label; els.modelSel.append(o);
+}
+try { const saved = localStorage.getItem("sf-model"); if (saved && MODELS[saved]) els.modelSel.value = saved; } catch {}
+
+/* ---------- Storage: keep the cache, check there's room ---------- */
+const APPROX_BYTES = { "llama-1b": { q4f16: 1.15e9, q4: 1.65e9 }, "qwen-0.5b": { q4f16: 0.55e9, q4: 0.85e9 } };
+async function checkStorage(key) {
+  // Ask the browser not to evict a ~1 GB cache under storage pressure (GitHub Pages is HTTPS, so this is allowed).
+  try { if (navigator.storage?.persist && !(await navigator.storage.persisted())) await navigator.storage.persist(); } catch {}
+  try {
+    if (!navigator.storage?.estimate || (await isCached(key))) return true;
+    const { quota = 0, usage = 0 } = await navigator.storage.estimate();
+    const need = APPROX_BYTES[key][dtype] * 1.1;
+    if (quota && quota - usage < need) {
+      return confirm(`This browser reports about ${fmtBytes(quota - usage)} free for this site and the model needs about ${fmtBytes(need)}. The download may fail. Try anyway?`);
+    }
+  } catch {}
+  return true;
+}
+
+if (location.protocol === "file:") {
+  els.hint.textContent = "Opened from disk — browsers block the model here. Serve the page (GitHub Pages, or python3 -m http.server).";
+}
+
+/* ---------- Backend detection: WebGPU first, WASM fallback ---------- */
+async function detectBackend() {
+  try {
+    if (navigator.gpu) {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter) {
+        device = "webgpu";
+        dtype = adapter.features.has("shader-f16") ? "q4f16" : "q4";
+        els.backend.innerHTML = `Running on <b>WebGPU</b> (${dtype})`;
+        return;
+      }
+    }
+  } catch {}
+  device = "wasm"; dtype = "q4";
+  els.backend.innerHTML = `No WebGPU — using <b>WASM</b> on the CPU (slower)`;
+}
+
+function updateSizeNote() {
+  const m = MODELS[els.modelSel.value];
+  els.sizeNote.textContent = `This one is ${m.size[dtype]} for your setup.`;
+}
+
+async function isCached(modelKey) {
+  try {
+    const cache = await caches.open("transformers-cache");
+    const keys = await cache.keys();
+    const id = MODELS[modelKey].id;
+    return keys.some((r) => r.url.includes(id) && r.url.includes(".onnx"));
+  } catch { return false; }
+}
+async function refreshButtonLabel() {
+  if (generator) return;
+  els.dlBtn.textContent = (await isCached(els.modelSel.value)) ? "Load model (cached)" : "Download model";
+}
+
+/* ---------- Progress ---------- */
+const files = new Map();      // file -> {loaded,total}
+function fmtBytes(n) {
+  if (!n) return "0 MB";
+  return n >= 1e9 ? (n / 1e9).toFixed(2) + " GB" : (n / 1e6).toFixed(0) + " MB";
+}
+function onProgress(p) {
+  if (p.status === "initiate") files.set(p.file, { loaded: 0, total: 0 });
+  if (p.status === "progress") files.set(p.file, { loaded: p.loaded || 0, total: p.total || 0 });
+  if (p.status === "done") { const f = files.get(p.file); if (f) f.loaded = f.total || f.loaded; }
+  let loaded = 0, total = 0;
+  for (const f of files.values()) { loaded += f.loaded; total += f.total; }
+  const pct = total ? Math.min(100, (loaded / total) * 100) : 0;
+  els.barFill.style.width = pct.toFixed(1) + "%";
+  els.bar.setAttribute("aria-valuenow", pct.toFixed(0));
+  els.pLeft.textContent = p.file ? `${p.status === "done" ? "Got" : "Fetching"} ${p.file.split("/").pop()}` : "Preparing…";
+  els.pRight.textContent = total ? `${fmtBytes(loaded)} of ${fmtBytes(total)} · ${pct.toFixed(0)}%` : "";
+}
+
+/* ---------- Load ---------- */
+async function loadModel() {
+  const key = els.modelSel.value;
+  try { localStorage.setItem("sf-model", key); } catch {}
+  if (!(await checkStorage(key))) return;
+  els.dlBtn.disabled = true; els.modelSel.disabled = true;
+  els.progress.classList.add("on"); files.clear(); onProgress({ status: "initiate" });
+  try {
+    if (!T) {
+      els.pLeft.textContent = "Fetching the runtime…";
+      T = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/dist/transformers.min.js");
+    }
+    const make = (dev, dt) => T.pipeline("text-generation", MODELS[key].id, { device: dev, dtype: dt, progress_callback: onProgress });
+    try {
+      generator = await make(device, dtype);
+    } catch (err) {
+      if (device !== "webgpu") throw err;
+      console.warn("WebGPU load failed, falling back to WASM:", err);
+      device = "wasm"; dtype = "q4"; updateSizeNote();
+      els.backend.innerHTML = `WebGPU failed — falling back to <b>WASM</b>`;
+      files.clear();
+      generator = await make(device, dtype);
+    }
+    stopper = new T.InterruptableStoppingCriteria();
+    els.pLeft.textContent = "Warming the lamp…";
+    await generator("Hi", { max_new_tokens: 1 }); // compiles shaders so the first real answer isn't slow
+    els.barFill.style.width = "100%";
+    els.pLeft.textContent = "Ready. It stays on this device.";
+    els.dlBtn.textContent = "Model loaded";
+    els.sendBtn.disabled = false;
+    els.hint.textContent = device === "webgpu" ? "Enter a film. She thinks before she answers." : "Enter a film. On CPU she takes a minute — that's the thinking.";
+    els.film.focus();
+  } catch (err) {
+    console.error(err);
+    els.pLeft.innerHTML = `<span style="color:#e0866f">Couldn't load: ${escapeHtml(err.message || String(err))}</span>`;
+    els.dlBtn.disabled = false; els.modelSel.disabled = false; els.dlBtn.textContent = "Try again";
+  }
+}
+
+/* ---------- Parsing her card ---------- */
+function normType(s) {
+  if (!s) return null;
+  const t = s.toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+  if (t.includes("palate") || t.includes("cleanser")) return "palate cleanser";
+  return TYPES.find((x) => t.startsWith(x) || t.includes(x)) || null;
+}
+function parseReply(text) {
+  const grab = (label) => {
+    const re = new RegExp(`^\\s*\\**${label}\\**\\s*:\\s*(.+)$`, "im");
+    const m = text.match(re); return m ? m[1].trim().replace(/\*+$/,"") : null;
+  };
+  const whyM = text.match(/^\s*\**WHY\**\s*:\s*([\s\S]+)$/im);
+  const out = {
+    typeRaw: grab("TYPE"),
+    pair: grab("PAIR WITH"),
+    first: grab("FIRST"),
+    second: grab("SECOND"),
+    totalRaw: grab("TOTAL"),
+    why: whyM ? whyM[1].trim() : null,
+  };
+  out.type = normType(out.typeRaw);
+  const tm = out.totalRaw && out.totalRaw.match(/(\d{2,3})/);
+  out.total = tm ? parseInt(tm[1], 10) : null;
+  out.isCard = !!(out.typeRaw || out.pair);
+  return out;
+}
+
+/* ---------- Rendering ---------- */
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function hideEmpty() { els.empty?.remove(); }
+
+function addUser(text) {
+  hideEmpty();
+  const d = document.createElement("div");
+  d.className = "msg user";
+  d.innerHTML = `<div class="stub">${escapeHtml(text)}</div>`;
+  els.chat.append(d); d.scrollIntoView({ block: "end", behavior: "smooth" });
+}
+function addVera() {
+  hideEmpty();
+  cardNo += 1;
+  const d = document.createElement("div");
+  d.className = "msg vera";
+  d.innerHTML = `<div class="card"><div class="cardhead"><span class="no">Card ${String(cardNo).padStart(4, "0")}</span><span class="slot"></span></div><div class="body"><span class="thinking">Thinking</span></div></div>`;
+  els.chat.append(d); d.scrollIntoView({ block: "end", behavior: "smooth" });
+  return d.querySelector(".card");
+}
+function renderStreaming(card, text) {
+  card.querySelector(".body").innerHTML = `<div class="speech">${escapeHtml(text)}</div>`;
+}
+function renderFinal(card, text, film) {
+  const p = parseReply(text);
+  const slot = card.querySelector(".slot");
+  const body = card.querySelector(".body");
+  if (!p.isCard) {
+    slot.innerHTML = "";
+    body.innerHTML = `<div class="speech">${escapeHtml(text.trim() || "I don't know.")}</div>`;
+    return p;
+  }
+  const cls = p.type ? "t-" + p.type.split(" ")[0] : "t-none";
+  slot.innerHTML = `<span class="typechip ${cls}">${escapeHtml(p.type || "type undeclared")}</span>`;
+  const first = p.first || film, second = p.second || p.pair;
+  const over = p.total && p.total > MAX_RUNTIME;
+  body.innerHTML = `
+    <dl>
+      <dt>Pair with</dt><dd>${escapeHtml(p.pair || "—")}</dd>
+      <dt>Order</dt><dd><ol class="order"><li data-n="1">${escapeHtml(first || "—")}</li><li data-n="2">${escapeHtml(second || "—")}</li></ol></dd>
+      <dt>Total</dt><dd>${escapeHtml(p.totalRaw || "—")}${over ? ` <span class="flag">— over ${MAX_RUNTIME}. She wouldn't.</span>` : ""}</dd>
+      <dt>Why</dt><dd class="why">${escapeHtml(p.why || "")}</dd>
+    </dl>
+    <div class="actions"></div>`;
+  const actions = body.querySelector(".actions");
+  const addAction = (label, msg) => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = label;
+    b.addEventListener("click", () => ask(msg, label));
+    actions.append(b);
+  };
+  if (over) addAction("Ask for a shorter one", `That bill is over ${MAX_RUNTIME} minutes. Same film of mine, pick a shorter second film.`);
+  addAction("Another pairing", `Same film of mine. Give me a different second film, a different pairing type.`);
+  addAction("Why that order?", `Why that running order and not the other way round? What changes in the room?`);
+  return p;
+}
+
+/* ---------- Conversation ---------- */
+function trimmedHistory() {
+  // Keep the last MAX_TURNS_KEPT exchanges only; the system prompt is always first.
+  return history.slice(-MAX_TURNS_KEPT * 2);
+}
+function compactForHistory(text) {
+  // Store a shortened copy of her reply so old turns don't eat the context.
+  const p = parseReply(text);
+  if (!p.isCard) return text.trim().slice(0, 400);
+  return [`TYPE: ${p.typeRaw ?? ""}`, `PAIR WITH: ${p.pair ?? ""}`, `FIRST: ${p.first ?? ""}`, `SECOND: ${p.second ?? ""}`, `TOTAL: ${p.totalRaw ?? ""}`, `WHY: ${(p.why ?? "").slice(0, 300)}`].join("\n");
+}
+
+async function generate(messages, onText) {
+  let text = "";
+  const streamer = new T.TextStreamer(generator.tokenizer, {
+    skip_prompt: true, skip_special_tokens: true,
+    callback_function: (chunk) => { text += chunk; onText(text); },
+  });
+  stopper.reset();
+  const out = await generator(messages, {
+    max_new_tokens: MAX_NEW_TOKENS,
+    do_sample: true, temperature: 0.6, top_p: 0.9, repetition_penalty: 1.1,
+    streamer, stopping_criteria: stopper,
+  });
+  const gen = out?.[0]?.generated_text;
+  if (Array.isArray(gen)) return gen.at(-1)?.content ?? text;
+  return text;
+}
+
+async function ask(userText, shownText = userText, film = null) {
+  if (!generator || busy) return;
+  busy = true; setBusy(true);
+  addUser(shownText);
+  const card = addVera();
+  history.push({ role: "user", content: userText });
+  const messages = [{ role: "system", content: SYSTEM_PROMPT }, ...trimmedHistory()];
+  try {
+    let reply = await generate(messages, (t) => renderStreaming(card, t));
+    let p = parseReply(reply);
+    // The type must always be one of the five. One quiet retry if she forgot.
+    if (p.isCard && !p.type && !stopper.interrupted) {
+      renderStreaming(card, "");
+      const fix = [...messages, { role: "assistant", content: reply },
+        { role: "user", content: `TYPE must be exactly one of: ${TYPES.join(", ")}. Give the card again in the same format.` }];
+      reply = await generate(fix, (t) => renderStreaming(card, t));
+    }
+    renderFinal(card, reply, film);
+    history.push({ role: "assistant", content: compactForHistory(reply) });
+  } catch (err) {
+    console.error(err);
+    card.querySelector(".body").innerHTML = `<div class="speech flag">The projector jammed: ${escapeHtml(err.message || String(err))}</div>`;
+    history.pop();
+  } finally {
+    busy = false; setBusy(false);
+  }
+}
+
+function setBusy(on) {
+  els.sendBtn.disabled = on || !generator;
+  els.stopBtn.hidden = !on;
+  els.film.disabled = on;
+}
+
+els.composer.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const film = els.film.value.trim();
+  if (!film) return;
+  const type = els.ptype.value;
+  const note = els.note.value.trim();
+  let msg = `My film: ${film}.`;
+  if (type) msg += ` I want a ${type} pairing.`;
+  if (note) msg += ` ${note}`;
+  let shown = film + (type ? ` · ${type}` : "") + (note ? ` — ${note}` : "");
+  ask(msg, shown, film);
+  els.note.value = "";
+});
+els.note.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); els.composer.requestSubmit(); }
+});
+els.stopBtn.addEventListener("click", () => stopper?.interrupt());
+els.resetBtn.addEventListener("click", () => {
+  if (busy) return;
+  history = []; cardNo = 0;
+  els.chat.innerHTML = `<div class="empty" id="empty">New evening. What are you showing?</div>`;
+  els.empty = $("empty");
+});
+els.dlBtn.addEventListener("click", loadModel);
+els.modelSel.addEventListener("change", () => { updateSizeNote(); refreshButtonLabel(); });
+
+await detectBackend();
+updateSizeNote();
+refreshButtonLabel();
+
+// Exposed for testing the renderer without a model.
+window.__sf = { parseReply, renderFinal, addVera, addUser, normType };
+</script>
+</body>
+</html>
