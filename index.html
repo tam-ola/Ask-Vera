@@ -44,6 +44,7 @@
   :root[data-theme="dark"] { --booth: #141310; --booth-2: #1d1b17; }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { margin: 0; }
   body {
     background: var(--booth);
@@ -94,8 +95,38 @@
   .ptext { font-family: var(--mono); font-size: 12px; color: var(--muted-on-booth); margin-top: 6px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 
   /* ---------- Chat ---------- */
-  .chat { display: flex; flex-direction: column; gap: 14px; min-height: 160px; margin-bottom: 16px; }
-  .empty { color: var(--muted-on-booth); font-style: italic; text-align: center; padding: 26px 8px; border: 1px dashed #3c372f; border-radius: 4px; }
+  .chat { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
+  .panel.compact { padding: 10px 14px; }
+  .panel.compact .note { display: none; }
+  .panel.compact .progress { display: none; }
+
+  /* Vera speaking: a line of talk with her initials */
+  .msg.vera { display: grid; grid-template-columns: 38px 1fr; gap: 10px; align-items: start; }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%; background: var(--card); color: var(--ink);
+    font-family: var(--mono); font-weight: 700; font-size: 12px; display: grid; place-items: center;
+    border: 2px solid var(--lamp); letter-spacing: .02em;
+  }
+  .say { min-width: 0; }
+  .who { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--lamp); margin-bottom: 4px; }
+  .talk { font-family: var(--serif); font-size: 16px; line-height: 1.55; color: var(--text-on-booth); white-space: pre-wrap; }
+  .talk + .card, .card + .talk { margin-top: 10px; }
+  .thinking { color: var(--muted-on-booth); font-style: italic; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 10px 48px; }
+  .chip {
+    font-family: var(--mono); font-size: 13px; background: transparent; color: var(--text-on-booth);
+    border: 1px solid #4a443a; border-radius: 999px; padding: 5px 12px; cursor: pointer;
+  }
+  .chip:hover { border-color: var(--lamp); color: var(--lamp); }
+  .chip.on { background: var(--lamp); color: #1d1606; border-color: var(--lamp); }
+  .followup { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn.small { padding: 7px 12px; font-size: 12px; }
+  .describe { display: grid; gap: 8px; }
+  .describe .lead { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--lamp); display: flex; justify-content: space-between; gap: 8px; }
+  .describe .lead button { background: none; border: 0; color: var(--muted-on-booth); font: inherit; cursor: pointer; letter-spacing: .1em; }
+  .describe .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .describe .tags .chip { font-size: 12px; padding: 3px 10px; }
 
   /* Visitor: a ticket stub */
   .msg.user { align-self: flex-end; max-width: 86%; }
@@ -108,7 +139,6 @@
   .stub::before { content: "ADMIT ONE"; display: block; font-size: 10px; letter-spacing: .3em; opacity: .65; margin-bottom: 2px; }
 
   /* Vera: an index card */
-  .msg.vera { align-self: stretch; }
   .card {
     background: var(--card); color: var(--ink); border-radius: 3px; box-shadow: var(--shadow);
     border-bottom: 1px solid var(--card-edge);
@@ -139,23 +169,32 @@
     border: 1px solid #b8ad94; padding: 2px 10px; border-radius: 2px; cursor: pointer; line-height: 22px;
   }
   .card .actions button:hover { background: #e9dfc8; }
-  .thinking { color: var(--ink-soft); font-style: italic; }
   .thinking::after { content: "▍"; animation: blink 1s steps(1) infinite; margin-left: 2px; }
   @keyframes blink { 50% { opacity: 0; } }
 
   /* ---------- Composer ---------- */
   form.composer {
-    background: var(--booth-2); border: 1px solid #36322b; border-radius: 4px; padding: 14px; display: grid; gap: 10px;
+    position: sticky; bottom: 0; z-index: 2;
+    background: var(--booth-2); border: 1px solid #36322b; border-radius: 6px; padding: 10px; display: grid; gap: 8px;
+    box-shadow: 0 -10px 24px var(--booth);
   }
-  .composer label { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted-on-booth); display: block; margin-bottom: 4px; }
-  .composer input, .composer textarea, .composer select {
-    width: 100%; background: var(--card); color: var(--ink); border: 0; border-radius: 2px;
-    padding: 10px 12px; font-family: var(--mono); font-size: 15px;
+  .inputrow { display: flex; gap: 8px; align-items: flex-end; }
+  .composer textarea {
+    flex: 1; min-width: 0; background: var(--card); color: var(--ink); border: 0; border-radius: 4px;
+    padding: 11px 12px; font-family: var(--mono); font-size: 15px; resize: none; max-height: 140px; line-height: 1.4;
   }
-  .composer textarea { resize: vertical; min-height: 44px; }
-  .grid2 { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
-  @media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
-  .composer .row { justify-content: space-between; }
+  .typepick { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .typepick span { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted-on-booth); margin-right: 2px; }
+  .typepick .chip { font-size: 12px; padding: 3px 10px; }
+  @media (max-width: 560px) {
+    .typepick { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+    .typepick .chip { flex: none; }
+    .describe .tags { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+    .describe .tags .chip { flex: none; }
+  }
+  .toolrow { display: flex; gap: 8px; align-items: center; justify-content: space-between; min-width: 0; }
+  .toolrow .typepick { flex: 1; min-width: 0; }
+  .hint:empty { display: none; }
   .hint { font-size: 13px; color: var(--muted-on-booth); font-style: italic; }
 
   .types { margin-top: 22px; font-size: 14px; color: var(--muted-on-booth); }
@@ -195,40 +234,24 @@
     </div>
   </section>
 
-  <section class="chat" id="chat" aria-live="polite">
-    <div class="empty" id="empty">The projector's warm. Load the model, then tell her what you're showing.</div>
-  </section>
+  <section class="chat" id="chat" aria-live="polite"></section>
+  <div class="chips" id="chips"></div>
 
   <form class="composer" id="composer" autocomplete="off">
-    <div class="grid2">
-      <div>
-        <label for="film">Your film</label>
-        <input id="film" placeholder="e.g. Tokyo Story, or Jaws" maxlength="120" required>
-      </div>
-      <div>
-        <label for="ptype">Pairing type</label>
-        <select id="ptype">
-          <option value="">Her choice</option>
-          <option value="rhyme">Rhyme</option>
-          <option value="argument">Argument</option>
-          <option value="lineage">Lineage</option>
-          <option value="escalation">Escalation</option>
-          <option value="palate cleanser">Palate cleanser</option>
-        </select>
-      </div>
+    <div class="describe" id="describe" hidden>
+      <div class="lead"><span id="describeLead">Tell her about it</span><button type="button" id="describeCancel">Cancel</button></div>
+      <div class="tags" id="describeTags"></div>
     </div>
-    <div>
-      <label for="note">Anything she should know (optional)</label>
-      <textarea id="note" rows="1" maxlength="400" placeholder="Who's coming, what you loved about it, how late the last bus is…"></textarea>
+    <div class="inputrow">
+      <textarea id="msg" rows="1" maxlength="600" placeholder="Tell her what you're showing, or ask her anything…" aria-label="Message to Vera"></textarea>
+      <button class="btn" id="sendBtn" type="submit">Send</button>
+      <button class="btn ghost" id="stopBtn" type="button" hidden>Stop</button>
     </div>
-    <div class="row">
-      <span class="hint" id="hint">Load the model first.</span>
-      <span class="row" style="gap:8px">
-        <button class="btn ghost" id="resetBtn" type="button" title="Clear the conversation">New evening</button>
-        <button class="btn ghost" id="stopBtn" type="button" hidden>Stop</button>
-        <button class="btn" id="sendBtn" type="submit" disabled>Ask Vera</button>
-      </span>
+    <div class="toolrow">
+      <div class="typepick" id="typepick"><span>Pairing</span></div>
+      <button class="btn ghost" id="resetBtn" type="button" title="Clear the conversation" style="padding:6px 10px;font-size:11px;flex:none">New evening</button>
     </div>
+    <div class="hint" id="hint"></div>
   </form>
 
   <details class="types">
@@ -266,62 +289,76 @@ const MODELS = {
 };
 
 const TYPES = ["rhyme", "argument", "lineage", "escalation", "palate cleanser"];
-const MAX_TURNS_KEPT = 2;        // user+assistant exchanges kept in history
+const MAX_TURNS_KEPT = 3;        // user+assistant exchanges kept in history
 const MAX_NEW_TOKENS = 340;
 const MAX_RUNTIME = 240;
 
-const SYSTEM_PROMPT = `You are Vera Olusanya-Brandt, 68. You programmed the Lyceum, a 312-seat single-screen cinema in an industrial city, from 1986 to 2014. Before that you ran a film society on a 16mm projector you maintained yourself. You keep a private card index of about four thousand double bills.
+const SYSTEM_PROMPT = `You are Vera Olusanya-Brandt, 68. You programmed the Lyceum, a 312-seat single-screen cinema in an industrial city, from 1986 to 2014, and left when it went digital. Before that you ran a film society on a 16mm projector you maintained yourself. You never went to film school; you sold tickets and ended up choosing the films because nobody else wanted the paperwork. You keep a private card index of about four thousand double bills and will not publish it. Retirement suits you.
 
-The visitor brings ONE film. You give them a SECOND film to show with it, the running order, and why it works on a room.
+You are talking with a visitor. Talk like a person, not a form.
 
-Every pairing is exactly one of these types. Name it.
+How you speak: flat, plain, unhurried. Judgment first, then the reason. No hedging, no flattery, no exclamation marks. If unsure, say "I don't know." Be specific: a shot, a minute, a reel, what a full house did, what time the last bus went. You talk about audiences more than films. Dry, not jokey. Usually two to four sentences.
+
+If the visitor says they loved a film you think is weak, say so, then ask what they loved about it. If you call a film overrated, name what it is famous for and the film that does that thing better. You are thin on films after 2015, streaming and animation, and on anything you never had a print of. If you do not recognise the visitor's film, or are not sure, say exactly "I've never heard of it." and ask them to tell you about it. Do not guess, do not give a card. Saying you don't know is not a failure; pretending is. Never invent a film.
+
+If the visitor then describes a film you didn't know, pair it from their description: build the card around what they told you, and only choose a second film you know well.
+
+Your craft. Every double bill is one of five types:
 - rhyme: a shared gesture or structure across eras.
 - argument: the second film rebuts the first.
 - lineage: the film and what it stole from.
 - escalation: same material, first cautious, then unhinged.
 - palate cleanser: something heavy, then something that lets the audience leave the building.
+Running order is the whole art. No bill over 240 minutes.
 
-Rules:
-- Total running time never over 240 minutes.
-- Running order matters. Say which goes first and why.
-- Talk about what the films do to an audience in a room, not about quality in the abstract. Be specific: a shot, a minute, a reel.
-- Judgment first, then the reason. Flat, plain, unhurried. No hedging, no flattery, no exclamation marks.
-- If you call a film overrated, name what it is famous for and the film that does that thing better.
-- Only suggest films you are sure exist. If you do not know the visitor's film (much after 2015, streaming, animation), say "I haven't seen it." and ask what it does. Do not invent.
-
-Answer in exactly this format, nothing before it:
+When the visitor names a film they are showing, give a pairing. You may say one short line first. Then the card, exactly:
 TYPE: <rhyme | argument | lineage | escalation | palate cleanser>
 PAIR WITH: <Title> (<year>, <director>, <minutes> min)
 FIRST: <title>
 SECOND: <title>
 TOTAL: <minutes> min
 WHY: <three to five sentences in your voice>
+ASK: <optional: one short question back to the visitor>
 
-Example. Visitor: Tokyo Story.
+When they are just talking, asking about you, the Lyceum, projection or a film, answer in plain speech with no card.
+
+Example.
+Visitor: I'm showing Tokyo Story.
+Vera: Good. That one needs a film that raises its voice first.
 TYPE: lineage
 PAIR WITH: Make Way for Tomorrow (1937, Leo McCarey, 92 min)
 FIRST: Make Way for Tomorrow
 SECOND: Tokyo Story
 TOTAL: 228 min
-WHY: Ozu took the bones of it, the old couple and the children with no room for them. McCarey first, because it is the louder film and the room cries at it openly. Then Ozu does the same thing without raising his voice and they sit very still. Put them the other way round and McCarey looks like he is shouting.
+WHY: Ozu took the bones of it, the old couple and the children with no room for them. McCarey first, because the room cries at it openly. Then Ozu does the same thing without raising his voice and they sit very still. The other way round, McCarey looks like he is shouting.
+ASK: How many are you expecting?
 
-Example. Visitor: Rear Window.
-TYPE: argument
-PAIR WITH: Peeping Tom (1960, Michael Powell, 101 min)
-FIRST: Rear Window
-SECOND: Peeping Tom
-TOTAL: 213 min
-WHY: Hitchcock lets the audience enjoy watching and then forgives them for it. Powell does not forgive anyone. Rear Window first so they arrive pleased with themselves. Nobody talks in the bar afterwards, which is the point.
+Example.
+Visitor: I'm showing The Quiet Orchard.
+Vera: I've never heard of it. Tell me about it. How long is it, and what does the room do at the end?
+
+Example.
+Visitor: Why did you leave when it went digital?
+Vera: Because they needed someone who wanted the new job, and I didn't. The argument was settled. The losing side was partly right, which is not the same as winning.
 
 Never reuse the example films unless the visitor brings one of them.`;
+
+const GREETING = "Sit down. The last bus is at eleven, so we have time.\nWhat are you showing? One film. I'll give you the other one.";
+const STARTERS = [
+  "I'm showing Jaws.",
+  "I'm showing In the Mood for Love to about thirty people.",
+  "What's the most overrated film you ever programmed?",
+  "How did you end up choosing the films?",
+  "Why no more than 240 minutes?",
+];
 
 /* ------------------------------------------------------------------ */
 const $ = (id) => document.getElementById(id);
 const els = {
   modelSel: $("modelSel"), dlBtn: $("dlBtn"), backend: $("backend"), sizeNote: $("sizeNote"),
   progress: $("progress"), bar: $("bar"), barFill: $("barFill"), pLeft: $("pLeft"), pRight: $("pRight"),
-  chat: $("chat"), empty: $("empty"), composer: $("composer"), film: $("film"), ptype: $("ptype"),
-  note: $("note"), hint: $("hint"), sendBtn: $("sendBtn"), stopBtn: $("stopBtn"), resetBtn: $("resetBtn"),
+  chat: $("chat"), chips: $("chips"), composer: $("composer"), msg: $("msg"), typepick: $("typepick"),
+  hint: $("hint"), sendBtn: $("sendBtn"), stopBtn: $("stopBtn"), resetBtn: $("resetBtn"), panel: document.querySelector(".panel"),
 };
 
 let T = null;                 // transformers module
@@ -332,6 +369,7 @@ let dtype = "q4";
 let history = [];             // [{role, content}] — trimmed
 let busy = false;
 let cardNo = 0;
+let wantType = "";            // optional pairing type the visitor picked
 
 for (const [key, m] of Object.entries(MODELS)) {
   const o = document.createElement("option");
@@ -442,9 +480,9 @@ async function loadModel() {
     els.barFill.style.width = "100%";
     els.pLeft.textContent = "Ready. It stays on this device.";
     els.dlBtn.textContent = "Model loaded";
-    els.sendBtn.disabled = false;
-    els.hint.textContent = device === "webgpu" ? "Enter a film. She thinks before she answers." : "Enter a film. On CPU she takes a minute — that's the thinking.";
-    els.film.focus();
+    els.panel.classList.add("compact");
+    els.hint.textContent = device === "webgpu" ? "" : "On CPU she takes a minute. That's the thinking.";
+    if (pending) { const m = pending; pending = null; ask(m, m, true); } else els.msg.focus();
   } catch (err) {
     console.error(err);
     els.pLeft.innerHTML = `<span style="color:#e0866f">Couldn't load: ${escapeHtml(err.message || String(err))}</span>`;
@@ -464,7 +502,8 @@ function parseReply(text) {
     const re = new RegExp(`^\\s*\\**${label}\\**\\s*:\\s*(.+)$`, "im");
     const m = text.match(re); return m ? m[1].trim().replace(/\*+$/,"") : null;
   };
-  const whyM = text.match(/^\s*\**WHY\**\s*:\s*([\s\S]+)$/im);
+  const whyM = text.match(/^\s*\**WHY\**\s*:\s*([\s\S]+?)(?=^\s*\**ASK\**\s*:|(?![\s\S]))/im);
+  const typeIdx = text.search(/^\s*\**TYPE\**\s*:/im);
   const out = {
     typeRaw: grab("TYPE"),
     pair: grab("PAIR WITH"),
@@ -472,68 +511,114 @@ function parseReply(text) {
     second: grab("SECOND"),
     totalRaw: grab("TOTAL"),
     why: whyM ? whyM[1].trim() : null,
+    ask: grab("ASK"),
+    pre: typeIdx > 0 ? text.slice(0, typeIdx).replace(/^\s*Vera\s*:\s*/i, "").trim() : "",
   };
   out.type = normType(out.typeRaw);
   const tm = out.totalRaw && out.totalRaw.match(/(\d{2,3})/);
   out.total = tm ? parseInt(tm[1], 10) : null;
-  out.isCard = !!(out.typeRaw || out.pair);
+  out.isCard = !!(out.typeRaw && out.pair);
   return out;
 }
 
 /* ---------- Rendering ---------- */
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
-function hideEmpty() { els.empty?.remove(); }
+function scrollDown(el) { el.scrollIntoView({ block: "end", behavior: "smooth" }); }
+function cleanSpeech(t) { return t.replace(/^\s*Vera\s*:\s*/i, "").trim(); }
 
 function addUser(text) {
-  hideEmpty();
+  hideChips();
   const d = document.createElement("div");
   d.className = "msg user";
   d.innerHTML = `<div class="stub">${escapeHtml(text)}</div>`;
-  els.chat.append(d); d.scrollIntoView({ block: "end", behavior: "smooth" });
+  els.chat.append(d); scrollDown(d);
 }
-function addVera() {
-  hideEmpty();
-  cardNo += 1;
+function addVera(initial) {
   const d = document.createElement("div");
   d.className = "msg vera";
-  d.innerHTML = `<div class="card"><div class="cardhead"><span class="no">Card ${String(cardNo).padStart(4, "0")}</span><span class="slot"></span></div><div class="body"><span class="thinking">Thinking</span></div></div>`;
-  els.chat.append(d); d.scrollIntoView({ block: "end", behavior: "smooth" });
-  return d.querySelector(".card");
+  d.innerHTML = `<div class="avatar" aria-hidden="true">VOB</div><div class="say"><div class="who">Vera</div><div class="body"></div></div>`;
+  const body = d.querySelector(".body");
+  if (initial) body.innerHTML = `<div class="talk">${escapeHtml(initial)}</div>`;
+  else body.innerHTML = `<div class="talk thinking">Thinking</div>`;
+  els.chat.append(d); scrollDown(d);
+  return d;
 }
-function renderStreaming(card, text) {
-  card.querySelector(".body").innerHTML = `<div class="speech">${escapeHtml(text)}</div>`;
+function renderStreaming(msgEl, text) {
+  const body = msgEl.querySelector(".body");
+  // Hide the raw card fields while they stream; show her talk and a placeholder.
+  const idx = text.search(/^\s*\**TYPE\**\s*:/im);
+  const talk = cleanSpeech(idx >= 0 ? text.slice(0, idx) : text);
+  body.innerHTML = (talk ? `<div class="talk">${escapeHtml(talk)}</div>` : "") +
+    (idx >= 0 || !talk ? `<div class="talk thinking">${idx >= 0 ? "Going through the card index" : "Thinking"}</div>` : "");
+  scrollDown(msgEl);
 }
-function renderFinal(card, text, film) {
+const UNKNOWN_RE = /\b(never heard of|haven'?t (seen|heard)|have not (seen|heard)|not familiar|don'?t know (it|that one|this one|that film|this film)|didn'?t have a print|not one i know)\b/i;
+
+function renderFinal(msgEl, text, film) {
   const p = parseReply(text);
-  const slot = card.querySelector(".slot");
-  const body = card.querySelector(".body");
+  const body = msgEl.querySelector(".body");
   if (!p.isCard) {
-    slot.innerHTML = "";
-    body.innerHTML = `<div class="speech">${escapeHtml(text.trim() || "I don't know.")}</div>`;
+    body.innerHTML = `<div class="talk">${escapeHtml(cleanSpeech(text) || "I don't know.")}</div>`;
+    if (UNKNOWN_RE.test(text)) {
+      const f = document.createElement("div"); f.className = "followup";
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn small"; b.textContent = "Tell me about it";
+      b.addEventListener("click", () => startDescribe(film));
+      f.append(b); body.append(f);
+    }
     return p;
   }
+  cardNo += 1;
   const cls = p.type ? "t-" + p.type.split(" ")[0] : "t-none";
-  slot.innerHTML = `<span class="typechip ${cls}">${escapeHtml(p.type || "type undeclared")}</span>`;
-  const first = p.first || film, second = p.second || p.pair;
+  const first = p.first || "—", second = p.second || p.pair || "—";
   const over = p.total && p.total > MAX_RUNTIME;
   body.innerHTML = `
-    <dl>
-      <dt>Pair with</dt><dd>${escapeHtml(p.pair || "—")}</dd>
-      <dt>Order</dt><dd><ol class="order"><li data-n="1">${escapeHtml(first || "—")}</li><li data-n="2">${escapeHtml(second || "—")}</li></ol></dd>
-      <dt>Total</dt><dd>${escapeHtml(p.totalRaw || "—")}${over ? ` <span class="flag">— over ${MAX_RUNTIME}. She wouldn't.</span>` : ""}</dd>
-      <dt>Why</dt><dd class="why">${escapeHtml(p.why || "")}</dd>
-    </dl>
-    <div class="actions"></div>`;
+    ${p.pre ? `<div class="talk">${escapeHtml(p.pre)}</div>` : ""}
+    <div class="card">
+      <div class="cardhead"><span class="no">Card ${String(cardNo).padStart(4, "0")}</span><span class="typechip ${cls}">${escapeHtml(p.type || "type undeclared")}</span></div>
+      <dl>
+        <dt>Pair with</dt><dd>${escapeHtml(p.pair || "—")}</dd>
+        <dt>Order</dt><dd><ol class="order"><li data-n="1">${escapeHtml(first)}</li><li data-n="2">${escapeHtml(second)}</li></ol></dd>
+        <dt>Total</dt><dd>${escapeHtml(p.totalRaw || "—")}${over ? ` <span class="flag">— over ${MAX_RUNTIME}. She wouldn't.</span>` : ""}</dd>
+        <dt>Why</dt><dd class="why">${escapeHtml(p.why || "")}</dd>
+      </dl>
+      <div class="actions"></div>
+    </div>
+    ${p.ask ? `<div class="talk">${escapeHtml(p.ask)}</div>` : ""}`;
   const actions = body.querySelector(".actions");
   const addAction = (label, msg) => {
     const b = document.createElement("button"); b.type = "button"; b.textContent = label;
     b.addEventListener("click", () => ask(msg, label));
     actions.append(b);
   };
-  if (over) addAction("Ask for a shorter one", `That bill is over ${MAX_RUNTIME} minutes. Same film of mine, pick a shorter second film.`);
-  addAction("Another pairing", `Same film of mine. Give me a different second film, a different pairing type.`);
-  addAction("Why that order?", `Why that running order and not the other way round? What changes in the room?`);
+  if (over) addAction("Something shorter?", `That's over ${MAX_RUNTIME} minutes. Same film of mine, a shorter second film.`);
+  addAction("Another pairing", `Same film of mine. A different second film, and a different type of pairing.`);
+  addAction("Why that order?", `Why that order and not the other way round? What changes in the room?`);
   return p;
+}
+
+/* ---------- Chips ---------- */
+function showChips() {
+  els.chips.innerHTML = "";
+  for (const s of STARTERS) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = s;
+    b.addEventListener("click", () => send(s));
+    els.chips.append(b);
+  }
+  els.chips.hidden = false;
+}
+function hideChips() { els.chips.hidden = true; }
+
+function buildTypePick() {
+  const opts = [["", "Her choice"], ...TYPES.map((t) => [t, t[0].toUpperCase() + t.slice(1)])];
+  for (const [v, label] of opts) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip" + (v === "" ? " on" : ""); b.textContent = label;
+    b.title = v ? `Ask for a ${v} pairing next` : "Let her choose the type";
+    b.addEventListener("click", () => {
+      wantType = v;
+      els.typepick.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === b));
+    });
+    els.typepick.append(b);
+  }
 }
 
 /* ---------- Conversation ---------- */
@@ -545,7 +630,7 @@ function compactForHistory(text) {
   // Store a shortened copy of her reply so old turns don't eat the context.
   const p = parseReply(text);
   if (!p.isCard) return text.trim().slice(0, 400);
-  return [`TYPE: ${p.typeRaw ?? ""}`, `PAIR WITH: ${p.pair ?? ""}`, `FIRST: ${p.first ?? ""}`, `SECOND: ${p.second ?? ""}`, `TOTAL: ${p.totalRaw ?? ""}`, `WHY: ${(p.why ?? "").slice(0, 300)}`].join("\n");
+  return [`TYPE: ${p.typeRaw ?? ""}`, `PAIR WITH: ${p.pair ?? ""}`, `FIRST: ${p.first ?? ""}`, `SECOND: ${p.second ?? ""}`, `TOTAL: ${p.totalRaw ?? ""}`, `WHY: ${(p.why ?? "").slice(0, 300)}`, p.ask ? `ASK: ${p.ask}` : ""].filter(Boolean).join("\n");
 }
 
 async function generate(messages, onText) {
@@ -565,10 +650,74 @@ async function generate(messages, onText) {
   return text;
 }
 
-async function ask(userText, shownText = userText, film = null) {
+let pending = null;
+
+/* ---------- "Tell me about it": describing a film she doesn't know ---------- */
+const DESCRIBE_TAGS = [
+  "It's a comedy", "It's slow and quiet", "It's very violent", "It's a thriller", "It's a documentary",
+  "It's animated", "It's a musical", "It's a love story", "It's about a family", "Under 90 minutes",
+  "About two hours", "Nobody talks afterwards", "People argue about it", "The audience laughs a lot",
+];
+let describing = null;        // the film being described, or "" if unknown
+
+function guessFilm(text) {
+  if (!text) return "";
+  const about = text.match(/^About (.+?):/);
+  if (about) return about[1];
+  const m = text.match(/(?:showing|programming|screening|my film(?: is)?:?|about|pair(?: with)?)\s+["“]?(.+?)["”]?(?:\s+to\b.*|\s+for\b.*)?[.?!]*$/i);
+  return (m ? m[1] : text).trim().slice(0, 80);
+}
+function startDescribe(film) {
+  describing = film || guessFilm(lastUserText) || "";
+  $("describeLead").textContent = describing ? `Tell her about ${describing}` : "Tell her about it";
+  const tags = $("describeTags"); tags.innerHTML = "";
+  for (const t of DESCRIBE_TAGS) {
+    const c = document.createElement("button"); c.type = "button"; c.className = "chip"; c.textContent = t;
+    c.addEventListener("click", () => {
+      c.classList.toggle("on");
+      const parts = [...tags.querySelectorAll(".chip.on")].map((x) => x.textContent);
+      const typed = els.msg.value.split(/\.\s*/).filter((x) => x && !DESCRIBE_TAGS.includes(x.trim())).join(". ");
+      els.msg.value = [...parts, typed].filter(Boolean).join(". ") + (parts.length || typed ? "." : "");
+      autosize(); els.msg.focus();
+    });
+    tags.append(c);
+  }
+  $("describe").hidden = false;
+  els.msg.placeholder = "What's it like? How long is it? What does the room do?";
+  els.msg.focus();
+}
+function endDescribe() {
+  describing = null;
+  $("describe").hidden = true;
+  els.msg.placeholder = "Tell her what you're showing, or ask her anything…";
+}
+$("describeCancel").addEventListener("click", endDescribe);
+let lastUserText = "";
+function send(text) {
+  text = text.trim();
+  if (!text || busy) return;
+  if (!generator) {
+    addUser(text);
+    if (els.dlBtn.disabled) {
+      pending = text;
+      addVera("Give it a minute. The projector's still warming up. I'll answer that when it's ready.");
+    } else {
+      pending = text;
+      addVera("The projector isn't on yet. Press Download model up there — it's a one-off, it stays on your machine — and I'll answer that.");
+      els.dlBtn.focus();
+    }
+    return;
+  }
+  ask(text);
+}
+
+async function ask(userText, shownText = userText, alreadyShown = false) {
   if (!generator || busy) return;
   busy = true; setBusy(true);
-  addUser(shownText);
+  if (!alreadyShown) addUser(shownText);
+  lastUserText = shownText;
+  const filmForTurn = guessFilm(shownText);
+  if (wantType) userText += ` (If you pair it, make it a ${wantType} pairing.)`;
   const card = addVera();
   history.push({ role: "user", content: userText });
   const messages = [{ role: "system", content: SYSTEM_PROMPT }, ...trimmedHistory()];
@@ -582,11 +731,11 @@ async function ask(userText, shownText = userText, film = null) {
         { role: "user", content: `TYPE must be exactly one of: ${TYPES.join(", ")}. Give the card again in the same format.` }];
       reply = await generate(fix, (t) => renderStreaming(card, t));
     }
-    renderFinal(card, reply, film);
+    renderFinal(card, reply, filmForTurn);
     history.push({ role: "assistant", content: compactForHistory(reply) });
   } catch (err) {
     console.error(err);
-    card.querySelector(".body").innerHTML = `<div class="speech flag">The projector jammed: ${escapeHtml(err.message || String(err))}</div>`;
+    card.querySelector(".body").innerHTML = `<div class="talk flag">The projector jammed: ${escapeHtml(err.message || String(err))}</div>`;
     history.pop();
   } finally {
     busy = false; setBusy(false);
@@ -594,43 +743,48 @@ async function ask(userText, shownText = userText, film = null) {
 }
 
 function setBusy(on) {
-  els.sendBtn.disabled = on || !generator;
+  els.sendBtn.hidden = on;
   els.stopBtn.hidden = !on;
-  els.film.disabled = on;
 }
 
 els.composer.addEventListener("submit", (e) => {
   e.preventDefault();
-  const film = els.film.value.trim();
-  if (!film) return;
-  const type = els.ptype.value;
-  const note = els.note.value.trim();
-  let msg = `My film: ${film}.`;
-  if (type) msg += ` I want a ${type} pairing.`;
-  if (note) msg += ` ${note}`;
-  let shown = film + (type ? ` · ${type}` : "") + (note ? ` — ${note}` : "");
-  ask(msg, shown, film);
-  els.note.value = "";
+  const t = els.msg.value.trim(); els.msg.value = ""; autosize();
+  if (!t) return;
+  if (describing !== null) {
+    const film = describing; endDescribe();
+    const wrapped = `Here is what ${film ? `"${film}"` : "the film"} is like: ${t} You don't know it, so pair it from what I've told you. Give me the card.`;
+    if (!generator) { send(t); return; }
+    ask(wrapped, `About ${film || "it"}: ${t}`);
+    return;
+  }
+  send(t);
 });
-els.note.addEventListener("keydown", (e) => {
+function autosize() { els.msg.style.height = "auto"; els.msg.style.height = Math.min(els.msg.scrollHeight, 140) + "px"; }
+els.msg.addEventListener("input", autosize);
+els.msg.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); els.composer.requestSubmit(); }
 });
 els.stopBtn.addEventListener("click", () => stopper?.interrupt());
 els.resetBtn.addEventListener("click", () => {
   if (busy) return;
-  history = []; cardNo = 0;
-  els.chat.innerHTML = `<div class="empty" id="empty">New evening. What are you showing?</div>`;
-  els.empty = $("empty");
+  history = []; cardNo = 0; pending = null; endDescribe();
+  els.chat.innerHTML = "";
+  addVera("New evening. What are you showing?");
+  showChips();
 });
 els.dlBtn.addEventListener("click", loadModel);
 els.modelSel.addEventListener("change", () => { updateSizeNote(); refreshButtonLabel(); });
 
+addVera(GREETING);
+showChips();
+buildTypePick();
 await detectBackend();
 updateSizeNote();
 refreshButtonLabel();
 
 // Exposed for testing the renderer without a model.
-window.__sf = { parseReply, renderFinal, addVera, addUser, normType };
+window.__sf = { parseReply, renderFinal, addVera, addUser, normType, renderStreaming };
 </script>
 </body>
 </html>
